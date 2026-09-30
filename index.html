@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nosso Cofre</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0e1a 0%, #131b31 50%, #0d1222 100%);
+            color: #ffffff;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1.5rem;
+        }
+    </style>
+</head>
+<body class="pb-28">
+
+    <!-- Cabeçalho -->
+    <header class="px-6 pt-8 pb-4 flex justify-between items-center max-w-md mx-auto">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-indigo-600/40 border border-indigo-400/30 flex items-center justify-center font-bold text-lg text-indigo-200">
+                C
+            </div>
+            <div>
+                <p class="text-xs tracking-widest text-indigo-300/60 uppercase font-semibold">Nosso Cofre</p>
+                <h1 id="titulo-mes" class="text-lg font-bold text-white">Setembro De 2026</h1>
+            </div>
+        </div>
+        <div class="flex space-x-2 items-center">
+            <button onclick="abrirConfigSync()" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-indigo-300 hover:bg-white/10 transition" title="Configurar Supabase">⚙️</button>
+            <div class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-gray-300">B</div>
+            <div class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-gray-300">I</div>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO DAS ABAS -->
+    <main class="max-w-md mx-auto px-4 space-y-4">
+        
+        <!-- ABA 1: INÍCIO -->
+        <section id="aba-inicio" class="space-y-4">
+            <div class="glass-card p-6 shadow-2xl relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
+                <p class="text-xs uppercase tracking-wider text-gray-400 font-medium mb-1">Sobrou Este Mês</p>
+                <h2 id="saldo-mes" class="text-4xl font-extrabold tracking-tight text-white mb-6">R$ 0,00</h2>
+                
+                <div class="grid grid-cols-2 gap-4 pt-2 border-t border-white/5">
+                    <div>
+                        <p class="text-xs text-gray-400">Renda</p>
+                        <p id="total-renda" class="text-lg font-semibold text-emerald-400">R$ 0,00</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400">Gastos</p>
+                        <p id="total-gastos" class="text-lg font-semibold text-rose-400">R$ 0,00</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="glass-card p-5">
+                    <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">Património</p>
+                    <p id="total-patrimonio" class="text-xl font-bold text-white">R$ 0,00</p>
+                </div>
+                <div class="glass-card p-5">
+                    <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">Contas a Pagar</p>
+                    <p id="total-contas" class="text-xl font-bold text-rose-400">R$ 0,00</p>
+                </div>
+            </div>
+
+            <div class="glass-card p-5">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-semibold text-sm text-white">Casa Própria</h3>
+                    <span class="text-xs text-gray-400">Previsão —</span>
+                </div>
+                <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden mb-3">
+                    <div id="meta-barra" class="bg-indigo-500 h-full w-[0%] transition-all duration-500"></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-400">
+                    <span id="meta-atual">R$ 0,00 · 0%</span>
+                    <span>faltam <strong id="meta-falta" class="text-rose-400">R$ 100.000,00</strong></span>
+                </div>
+            </div>
+
+            <div class="pt-2 pb-6">
+                <div class="flex justify-between items-center mb-3 px-1">
+                    <h3 class="text-sm font-semibold text-gray-300">Últimos lançamentos</h3>
+                </div>
+                <div id="lista-lancamentos" class="space-y-2">
+                    <div class="glass-card p-4 text-center text-xs text-gray-400">
+                        Registem a renda e os gastos no botão + aqui embaixo.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 2: GASTOS -->
+        <section id="aba-gastos" class="space-y-4 hidden">
+            <div class="glass-card p-5">
+                <h3 class="font-semibold text-sm text-white mb-3">Gastos por Pessoa</h3>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                        <p class="text-xs text-gray-400">Gastos Bárbara</p>
+                        <p id="gastos-barbara" class="text-base font-bold text-rose-400">R$ 0,00</p>
+                    </div>
+                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                        <p class="text-xs text-gray-400">Gastos Igor</p>
+                        <p id="gastos-igor" class="text-base font-bold text-rose-400">R$ 0,00</p>
+                    </div>
+                </div>
+            </div>
+            <div class="glass-card p-5">
+                <h3 class="font-semibold text-sm text-white mb-3">Todos os Gastos do Mês</h3>
+                <div id="lista-gastos-mes" class="space-y-2">
+                    <div class="text-center text-xs text-gray-400 py-4">Nenhum gasto registado.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 3: RESERVAS -->
+        <section id="aba-reservas" class="space-y-4 hidden">
+            <div class="glass-card p-5">
+                <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">Património Total</p>
+                <h3 id="reserva-patrimonio" class="text-2xl font-bold text-white mb-2">R$ 0,00</h3>
+                <p class="text-xs text-gray-400">Inclui reservas, FGTS e investimentos.</p>
+            </div>
+            <div class="glass-card p-5">
+                <h3 class="font-semibold text-sm text-white mb-3">Reservas por Pessoa</h3>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                        <p class="text-xs text-gray-400">Bárbara</p>
+                        <p id="reservas-barbara" class="text-base font-bold text-emerald-400">R$ 0,00</p>
+                    </div>
+                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                        <p class="text-xs text-gray-400">Igor</p>
+                        <p id="reservas-igor" class="text-base font-bold text-emerald-400">R$ 0,00</p>
+                    </div>
+                </div>
+            </div>
+            <div class="glass-card p-5">
+                <h3 class="font-semibold text-sm text-white mb-3">Histórico de Reservas / FGTS</h3>
+                <div id="lista-reservas" class="space-y-2">
+                    <div class="text-center text-xs text-gray-400 py-4">Nenhuma reserva registada.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 4: META -->
+        <section id="aba-meta" class="space-y-4 hidden">
+            <div class="glass-card p-5 space-y-3">
+                <h3 class="font-semibold text-sm text-white">Casa Própria</h3>
+                <p id="meta-valor-acumulado" class="text-2xl font-bold text-emerald-400">R$ 0,00</p>
+                <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                    <div id="meta-barra-aba" class="bg-indigo-500 h-full w-[0%]"></div>
+                </div>
+                <p class="text-xs text-gray-400">Use a categoria "Casa Própria" para alimentar esta meta.</p>
+            </div>
+            <div class="glass-card p-5 space-y-3">
+                <h3 class="font-semibold text-sm text-white mb-2">Quem participa</h3>
+                <div class="space-y-2 text-sm font-medium text-white">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-7 h-7 rounded-full bg-indigo-600/30 flex items-center justify-center text-xs">B</span>
+                        <span>Bárbara</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="w-7 h-7 rounded-full bg-indigo-600/30 flex items-center justify-center text-xs">I</span>
+                        <span>Igor</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 5: RELATÓRIO -->
+        <section id="aba-relatorio" class="space-y-4 hidden">
+            <div class="glass-card p-5 space-y-3">
+                <h3 class="font-semibold text-sm text-white">Ritmo de vocês</h3>
+                <div id="relatorio-categorias" class="text-xs text-gray-400">
+                    Sem movimentos neste mês.
+                </div>
+            </div>
+            <div class="glass-card p-5 space-y-3">
+                <h3 class="font-semibold text-sm text-white">Média dos últimos 3 meses</h3>
+                <p class="text-xl font-bold text-emerald-400">R$ 0,00 / mês</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Barra de Navegação Inferior -->
+    <nav class="fixed bottom-0 left-0 right-0 glass-card border-t border-white/10 py-3 px-6 max-w-md mx-auto rounded-none backdrop-blur-xl flex justify-between items-center text-xs text-gray-400 z-40">
+        <button onclick="mudarAba('inicio')" id="btn-nav-inicio" class="text-white font-medium flex flex-col items-center">Início</button>
+        <button onclick="mudarAba('gastos')" id="btn-nav-gastos" class="hover:text-white flex flex-col items-center">Gastos</button>
+        <button onclick="mudarAba('reservas')" id="btn-nav-reservas" class="hover:text-white flex flex-col items-center">Reservas</button>
+        <button onclick="mudarAba('meta')" id="btn-nav-meta" class="hover:text-white flex flex-col items-center">Meta</button>
+        <button onclick="mudarAba('relatorio')" id="btn-nav-relatorio" class="hover:text-white flex flex-col items-center">Relatório</button>
+        <button onclick="abrirModal()" class="w-11 h-11 bg-indigo-600 hover:bg-indigo-500 rounded-full flex items-center justify-center text-white text-xl shadow-lg shadow-indigo-600/30 transition transform active:scale-95">
+            +
+        </button>
+    </nav>
+
+    <!-- Modal Adicionar Transação -->
+    <div id="modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-card p-6 w-full max-w-sm space-y-4 border border-white/10 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold text-white">Novo Lançamento</h3>
+            <div>
+                <label class="text-xs text-gray-400 block mb-1">Responsável</label>
+                <select id="input-responsavel" class="w-full bg-[#131b31] border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    <option value="Bárbara">Bárbara</option>
+                    <option value="Igor">Igor</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-xs text-gray-400 block mb-1">Descrição</label>
+                <input id="input-desc" type="text" placeholder="Ex: Salário, Supermercado..." class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+                <label class="text-xs text-gray-400 block mb-1">Valor (R$)</label>
+                <input id="input-valor" type="number" step="0.01" placeholder="0.00" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+                <label class="text-xs text-gray-400 block mb-1">Tipo</label>
+                <select id="input-tipo" class="w-full bg-[#131b31] border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    <option value="receita">Renda / Entrada / Reserva</option>
+                    <option value="gasto">Gasto / Despesa</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-xs text-gray-400 block mb-1">Categoria</label>
+                <select id="input-categoria" class="w-full bg-[#131b31] border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    <option value="Geral">Geral</option>
+                    <option value="Salário">Salário</option>
+                    <option value="Casa Própria">Casa Própria (Meta)</option>
+                    <option value="FGTS">FGTS (Reserva)</option>
+                    <option value="Reserva de Emergência">Reserva de Emergência</option>
+                    <option value="Alimentação">Alimentação</option>
+                    <option value="Contas (Água/Luz/Net)">Contas (Água/Luz/Net)</option>
+                    <option value="Lazer">Lazer</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-xs text-gray-400 block mb-1">Observações (Opcional)</label>
+                <textarea id="input-obs" placeholder="Detalhes, notas..." rows="2" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
+            </div>
+            <div class="flex space-x-3 pt-2">
+                <button onclick="fecharModal()" class="flex-1 bg-white/5 hover:bg-white/10 py-3 rounded-xl text-xs font-semibold text-gray-300 transition">Cancelar</button>
+                <button onclick="adicionarTransacao()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl text-xs font-semibold text-white transition shadow-lg shadow-indigo-600/30">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de Gestão e Supabase -->
+    <script>
+        const SUPABASE_URL = 'SUA_SUPABASE_URL_AQUI';
+        const SUPABASE_ANON_KEY = 'SUA_SUPABASE_ANON_KEY_AQUI';
+
+        let supabaseClient = null;
+
+        const savedUrl = localStorage.getItem('s_url') || SUPABASE_URL;
+        const savedKey = localStorage.getItem('s_key') || SUPABASE_ANON_KEY;
+
+        if (savedUrl && savedUrl !== 'SUA_SUPABASE_URL_AQUI') {
+            supabaseClient = supabase.createClient(savedUrl, savedKey);
+            carregarDados();
+            subcreverTempoReal();
+        }
+
+        function abrirConfigSync() {
+            const url = prompt("Insira a sua SUPABASE_URL:", localStorage.getItem('s_url') || '');
+            const key = prompt("Insira a sua SUPABASE_ANON_KEY:", localStorage.getItem('s_key') || '');
+            if (url && key) {
+                localStorage.setItem('s_url', url.trim());
+                localStorage.setItem('s_key', key.trim());
+                location.reload();
+            }
+        }
+
+        function mudarAba(aba) {
+            ['inicio', 'gastos', 'reservas', 'meta', 'relatorio'].forEach(a => {
+                document.getElementById(`aba-${a}`).classList.add('hidden');
+                document.getElementById(`btn-nav-${a}`).classList.remove('text-white', 'font-medium');
+                document.getElementById(`btn-nav-${a}`).classList.add('text-gray-400');
+            });
+            document.getElementById(`aba-${aba}`).classList.remove('hidden');
+            document.getElementById(`btn-nav-${aba}`).classList.add('text-white', 'font-medium');
+            document.getElementById(`btn-nav-${aba}`).classList.remove('text-gray-400');
+        }
+
+        function abrirModal() {
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        function fecharModal() {
+            document.getElementById('modal').classList.add('hidden');
+        }
+
+        async function carregarDados() {
+            if (!supabaseClient) return;
+            const { data, error } = await supabaseClient.from('transacoes').select('*').order('id', { ascending: false });
+            if (error) {
+                console.error('Erro ao carregar:', error);
+                return;
+            }
+            atualizarInterface(data);
+        }
+
+        function subcreverTempoReal() {
+            if (!supabaseClient) return;
+            supabaseClient
+                .channel('public:transacoes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'transacoes' }, payload => {
+                    carregarDados();
+                })
+                .subscribe();
+        }
+
+        async function adicionarTransacao() {
+            const responsavel = document.getElementById('input-responsavel').value;
+            const desc = document.getElementById('input-desc').value;
+            const valor = parseFloat(document.getElementById('input-valor').value);
+            const tipo = document.getElementById('input-tipo').value;
+            const categoria = document.getElementById('input-categoria').value;
+            const observacoes = document.getElementById('input-obs').value;
+
+            if (!desc || isNaN(valor)) {
+                alert('Por favor, preencha a descrição e o valor corretamente.');
+                return;
+            }
+
+            if (!supabaseClient || savedUrl === 'SUA_SUPABASE_URL_AQUI') {
+                alert('Configure primeiro a base de dados Supabase clicando na engrenagem ⚙️ no topo.');
+                abrirConfigSync();
+                return;
+            }
+
+            const { error } = await supabaseClient.from('transacoes').insert([{ 
+                responsavel: responsavel,
+                descricao: desc, 
+                valor: valor, 
+                tipo: tipo, 
+                categoria: categoria,
+                observacoes: observacoes 
+            }]);
+
+            if (error) {
+                alert('Erro ao guardar: ' + error.message);
+            } else {
+                fecharModal();
+                document.getElementById('input-desc').value = '';
+                document.getElementById('input-valor').value = '';
+                document.getElementById('input-obs').value = '';
+                carregarDados();
+            }
+        }
+
+        async function apagarTransacao(id) {
+            if (!confirm('Deseja realmente apagar este lançamento?')) return;
+            const { error } = await supabaseClient.from('transacoes').delete().eq('id', id);
+            if (error) {
+                alert('Erro ao apagar: ' + error.message);
+            } else {
+                carregarDados();
+            }
+        }
+
+        function atualizarInterface(transacoes) {
+            let rendaTotal = 0;
+            let gastosTotal = 0;
+            let casaPropriaTotal = 0;
+            let patrimonioTotal = 0;
+            
+            let gastosBarbara = 0;
+            let gastosIgor = 0;
+            let reservasBarbara = 0;
+            let reservasIgor = 0;
+
+            const listaEl = document.getElementById('lista-lancamentos');
+            const listaGastosEl = document.getElementById('lista-gastos-mes');
+            const listaReservasEl = document.getElementById('lista-reservas');
+            
+            listaEl.innerHTML = '';
+            listaGastosEl.innerHTML = '';
+            listaReservasEl.innerHTML = '';
+
+            if (transacoes.length === 0) {
+                listaEl.innerHTML = `<div class="glass-card p-4 text-center text-xs text-gray-400">Registem a renda e os gastos no botão + aqui embaixo.</div>`;
+                listaGastosEl.innerHTML = `<div class="text-center text-xs text-gray-400 py-4">Nenhum gasto registado.</div>`;
+                listaReservasEl.innerHTML = `<div class="text-center text-xs text-gray-400 py-4">Nenhuma reserva registada.</div>`;
+            }
+
+            transacoes.forEach((t, index) => {
+                const valorNum = Number(t.valor);
+                const resp = t.responsavel || 'Bárbara';
+
+                if (t.tipo === 'receita') {
+                    rendaTotal += valorNum;
+                    if (t.categoria === 'Casa Própria' || t.categoria === 'FGTS' || t.categoria === 'Reserva de Emergência') {
+                        patrimonioTotal += valorNum;
+                        if (resp === 'Bárbara') reservasBarbara += valorNum;
+                        if (resp === 'Igor') reservasIgor += valorNum;
+                    }
+                    if (t.categoria === 'Casa Própria') {
+                        casaPropriaTotal += valorNum;
+                    }
+                } else {
+                    gastosTotal += valorNum;
+                    if (resp === 'Bárbara') gastosBarbara += valorNum;
+                    if (resp === 'Igor') gastosIgor += valorNum;
+                }
+
+                const obsHTML = t.observacoes ? `<p class="text-[10px] text-gray-400 italic">Obs: ${t.observacoes}</p>` : '';
+
+                const itemHTML = `
+                    <div class="glass-card p-3 flex justify-between items-center text-sm">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-full ${t.tipo === 'receita' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'} flex items-center justify-center font-bold">
+                                ${t.tipo === 'receita' ? '↓' : '↑'}
+                            </div>
+                            <div>
+                                <p class="font-medium text-white">${t.descricao} <span class="text-[9px] text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded-full ml-1">${resp}</span> <span class="text-[9px] text-gray-300 bg-white/10 px-2 py-0.5 rounded-full">${t.categoria || 'Geral'}</span></p>
+                                ${obsHTML}
+                                <p class="text-[10px] text-gray-400">${new Date(t.data).toLocaleDateString('pt-PT')}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="font-semibold ${t.tipo === 'receita' ? 'text-emerald-400' : 'text-rose-400'}">
+                                ${t.tipo === 'receita' ? '+' : '-'} R$ ${valorNum.toFixed(2)}
+                            </span>
+                            <button onclick="apagarTransacao(${t.id})" class="w-7 h-7 rounded-full bg-rose-500/10 hover:bg-rose-500/30 text-rose-400 flex items-center justify-center text-xs transition" title="Apagar">🗑️</button>
+                        </div>
+                    </div>
+                `;
+
+                if (index < 5) listaEl.innerHTML += itemHTML;
+                if (t.tipo === 'gasto') listaGastosEl.innerHTML += itemHTML;
+                if (t.tipo === 'receita' && (t.categoria === 'FGTS' || t.categoria === 'Reserva de Emergência' || t.categoria === 'Casa Própria')) {
+                    listaReservasEl.innerHTML += itemHTML;
+                }
+            });
+
+            // Atualizar valores no ecrã
+            const sobra = rendaTotal - gastosTotal;
+            document.getElementById('saldo-mes').innerText = `R$ ${sobra.toFixed(2)}`;
+            document.getElementById('total-renda').innerText = `R$ ${rendaTotal.toFixed(2)}`;
+            document.getElementById('total-gastos').innerText = `R$ ${gastosTotal.toFixed(2)}`;
+            document.getElementById('total-contas').innerText = `R$ ${gastosTotal.toFixed(2)}`;
+            document.getElementById('total-patrimonio').innerText = `R$ ${patrimonioTotal.toFixed(2)}`;
+            document.getElementById('reserva-patrimonio').innerText = `R$ ${patrimonioTotal.toFixed(2)}`;
+            document.getElementById('meta-valor-acumulado').innerText = `R$ ${casaPropriaTotal.toFixed(2)}`;
+
+            document.getElementById('gastos-barbara').innerText = `R$ ${gastosBarbara.toFixed(2)}`;
+            document.getElementById('gastos-igor').innerText = `R$ ${gastosIgor.toFixed(2)}`;
+            document.getElementById('reservas-barbara').innerText = `R$ ${reservasBarbara.toFixed(2)}`;
+            document.getElementById('reservas-igor').innerText = `R$ ${reservasIgor.toFixed(2)}`;
+
+            const metaTotal = 100000;
+            const progresso = Math.min((casaPropriaTotal / metaTotal) * 100, 100);
+            document.getElementById('meta-barra').style.width = `${progresso}%`;
+            document.getElementById('meta-barra-aba').style.width = `${progresso}%`;
+            document.getElementById('meta-atual').innerText = `R$ ${casaPropriaTotal.toLocaleString('pt-PT', {minimumFractionDigits: 2})} · ${progresso.toFixed(1)}%`;
+            const falta = Math.max(metaTotal - casaPropriaTotal, 0);
+            document.getElementById('meta-falta').innerText = `R$ ${falta.toLocaleString('pt-PT', {minimumFractionDigits: 2})}`;
+        }
+    </script>
+</body>
+</html>
+
