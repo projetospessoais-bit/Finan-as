@@ -259,15 +259,15 @@
 
     <!-- Script de Gestão e Supabase -->
     <script>
-        const SUPABASE_URL = 'SUA_SUPABASE_URL_AQUI';
-        const SUPABASE_ANON_KEY = 'SUA_SUPABASE_ANON_KEY_AQUI';
+        const SUPABASE_URL = 'https://ukdtjlgvngfolauruiln.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_ekY7I3o_QDYhcA0o-1RsrA_Bl67mmA5';
 
         let supabaseClient = null;
 
         const savedUrl = localStorage.getItem('s_url') || SUPABASE_URL;
         const savedKey = localStorage.getItem('s_key') || SUPABASE_ANON_KEY;
 
-        if (savedUrl && savedUrl !== 'SUA_SUPABASE_URL_AQUI') {
+        if (savedUrl && savedUrl !== 'https://ukdtjlgvngfolauruiln.supabase.co') {
             supabaseClient = supabase.createClient(savedUrl, savedKey);
             carregarDados();
             subcreverTempoReal();
