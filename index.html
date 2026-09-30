@@ -257,31 +257,34 @@
         </div>
     </div>
 
-    <!-- Script de Gestão e Supabase -->
+      <!-- Script de Gestão e Supabase -->
     <script>
-        const SUPABASE_URL = 'https://ukdtjlgvngfolauruiln.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_ekY7I3o_QDYhcA0o-1RsrA_Bl67mmA5';
+        // Insira aqui as suas chaves do Supabase
+        const SUPABASE_URL = 'https://ukdtjlgngfolauruiin.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_ekY7I3b_ODYncAb0-1RsrA_B167mm451';
 
         let supabaseClient = null;
 
+        // ESTAS DUAS LINHAS SÃO ESSENCIAIS PARA O TELEMÓVEL LER AS CHAVES ACIMA
         const savedUrl = localStorage.getItem('s_url') || SUPABASE_URL;
         const savedKey = localStorage.getItem('s_key') || SUPABASE_ANON_KEY;
 
-        if (savedUrl && savedUrl !== 'https://ukdtjlgvngfolauruiln.supabase.co') {
+        if (savedUrl && savedUrl !== 'SUA_SUPABASE_URL_AQUI') {
             supabaseClient = supabase.createClient(savedUrl, savedKey);
             carregarDados();
             subcreverTempoReal();
         }
 
         function abrirConfigSync() {
-            const url = prompt("Insira a sua SUPABASE_URL:", localStorage.getItem('s_url') || '');
-            const key = prompt("Insira a sua SUPABASE_ANON_KEY:", localStorage.getItem('s_key') || '');
+            const url = prompt("Insira a sua SUPABASE_URL:", savedUrl);
+            const key = prompt("Insira a sua SUPABASE_ANON_KEY:", savedKey);
             if (url && key) {
                 localStorage.setItem('s_url', url.trim());
                 localStorage.setItem('s_key', key.trim());
                 location.reload();
             }
         }
+
 
         function mudarAba(aba) {
             ['inicio', 'gastos', 'reservas', 'meta', 'relatorio'].forEach(a => {
