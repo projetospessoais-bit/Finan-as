@@ -257,38 +257,41 @@
         </div>
     </div>
 
-        <!-- Script de Gestão e Supabase -->
+    <!-- Script de Gestão e Supabase -->
     <script>
-        // INSIRA AQUI AS SUAS CHAVES DO SUPABASE (FIXAS)
+        // --- CONFIGURAÇÃO FIXA (NÃO ALTERAR NO CÓDIGO DO GITHUB) ---
         const SUPABASE_URL = 'https://ukdtjlgngfolauruiin.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_ekY7I3b_ODYncAb0-1RsrA_B167mm451';
+        // ----------------------------------------------------------
 
         let supabaseClient = null;
 
-        // INICIALIZAÇÃO CORRIGIDA: Prioriza as chaves definidas acima, ignorando caches antigos.
-        if (SUPABASE_URL && SUPABASE_URL.startsWith('https://')) {
+        // INICIALIZAÇÃO AGRESSIVA: Força a conexão com as chaves acima, ignorando o localStorage
+        if (SUPABASE_URL && SUPABASE_URL !== 'SUA_SUPABASE_URL_AQUI') {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log("Conectado ao Supabase com sucesso!");
+            console.log("Conexão Supabase iniciada.");
             carregarDados();
             subcreverTempoReal();
         } else {
-            console.warn("Supabase não configurado no código fixo.");
+            console.error("Supabase não configurado.");
+            abrirConfigSync(); // Pede configuração se as chaves estiverem em branco
         }
 
-        // Esta função é mantida para permitir alteração futura se necessário,
-        // mas o sistema tentará sempre usar as chaves fixas acima.
+        // Esta função agora avisa o utilizador para alterar o código,
+        // mas não altera o comportamento de inicialização agressiva acima.
         function abrirConfigSync() {
-            alert("As chaves do Supabase estão definidas no código. Para as alterar, edite o ficheiro index.html.");
-            const url = prompt("SUPABASE_URL atual:", SUPABASE_URL);
-            const key = prompt("SUPABASE_ANON_KEY atual:", SUPABASE_ANON_KEY);
-             if (url && key) {
-                 alert("Para aplicar as novas chaves, deve alterar o código fonte no GitHub.");
-            }
+             const confirmar = confirm("As chaves do Supabase estão definidas no código fonte. Se a conexão falhou, verifique se a URL e a Key estão corretas no ficheiro index.html no GitHub. Deseja tentar reconfigurar manualmente na cache?");
+             if(confirmar) {
+                const url = prompt("Insira a sua SUPABASE_URL (ex: https://xyz.supabase.co):", SUPABASE_URL);
+                const key = prompt("Insira a sua SUPABASE_ANON_KEY:", SUPABASE_ANON_KEY);
+                if (url && key) {
+                    localStorage.setItem('s_url', url.trim());
+                    localStorage.setItem('s_key', key.trim());
+                    location.reload();
+                }
+             }
         }
 
-        // ... restante do seu código (funções mudarAba, carregarDados, adicionarTransacao, etc.)
-        // (Pode colar o resto do seu código original aqui a seguir)
-        
         function mudarAba(aba) {
             ['inicio', 'gastos', 'reservas', 'meta', 'relatorio'].forEach(a => {
                 document.getElementById(`aba-${a}`).classList.add('hidden');
@@ -313,6 +316,13 @@
             const { data, error } = await supabaseClient.from('transacoes').select('*').order('id', { ascending: false });
             if (error) {
                 console.error('Erro ao carregar:', error);
+                // Se falhar, tenta limpar o cliente e reconfigurar do localStorage como fallback
+                supabaseClient = null; 
+                const savedUrl = localStorage.getItem('s_url');
+                if(savedUrl) {
+                     supabaseClient = supabase.createClient(savedUrl, localStorage.getItem('s_key'));
+                     carregarDados();
+                }
                 return;
             }
             atualizarInterface(data);
@@ -337,7 +347,8 @@
             const observacoes = document.getElementById('input-obs').value;
 
             if (!supabaseClient) {
-                alert('Base de dados não configurada.');
+                alert('Base de dados não configurada. Clique na engrenagem ⚙️ no topo.');
+                abrirConfigSync();
                 return;
             }
 
