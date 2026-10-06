@@ -1,490 +1,404 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nosso Cofre</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Supabase JS Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body {
-            background: linear-gradient(135deg, #0a0e1a 0%, #131b31 50%, #0d1222 100%);
-            color: #ffffff;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            min-height: 100vh;
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 1.5rem;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0e1a">
+<title>Nosso Cofre</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{background:radial-gradient(circle at 20% 0,#1b2347 0,#0a0e1a 55%);background-attachment:fixed;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;min-height:100vh;font-variant-numeric:tabular-nums}
+.gc{background:rgba(255,255,255,.04);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.08);border-radius:1.25rem}
+.chip{padding:.4rem .8rem;border-radius:999px;font-size:11px;border:1px solid rgba(255,255,255,.1);color:#9ca3af}
+.chip.on{background:#4f46e5;border-color:#6366f1;color:#fff}
+.inp{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:.75rem;padding:.7rem;font-size:14px;color:#fff;outline:none}
+.inp:focus{border-color:#6366f1}select.inp option{background:#131b31}
+.bar{height:6px;border-radius:9px;background:rgba(255,255,255,.1);overflow:hidden}.bar i{display:block;height:100%;border-radius:9px;transition:width .6s}
+.hidden{display:none!important}.ov{display:flex}
+.priv .num{filter:blur(7px);user-select:none}
+.sk{height:56px;border-radius:1rem;background:linear-gradient(90deg,rgba(255,255,255,.04),rgba(255,255,255,.1),rgba(255,255,255,.04));background-size:200% 100%;animation:sk 1.2s infinite}
+@keyframes sk{to{background-position:-200% 0}}
+button:focus-visible,.inp:focus-visible{outline:2px solid #818cf8;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body class="pb-28">
-
-    <!-- Cabeçalho -->
-    <header class="px-6 pt-8 pb-4 flex justify-between items-center max-w-md mx-auto">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-full bg-indigo-600/40 border border-indigo-400/30 flex items-center justify-center font-bold text-lg text-indigo-200">
-                C
-            </div>
-            <div>
-                <p class="text-xs tracking-widest text-indigo-300/60 uppercase font-semibold">Nosso Cofre</p>
-                <h1 id="titulo-mes" class="text-lg font-bold text-white">Setembro De 2026</h1>
-            </div>
-        </div>
-        <div class="flex space-x-2 items-center">
-            <button onclick="abrirConfigSync()" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-indigo-300 hover:bg-white/10 transition" title="Configurar Supabase">⚙️</button>
-            <div class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-gray-300">B</div>
-            <div class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-gray-300">I</div>
-        </div>
-    </header>
-
-    <!-- CONTEÚDO DAS ABAS -->
-    <main class="max-w-md mx-auto px-4 space-y-4">
-        
-        <!-- ABA 1: INÍCIO -->
-        <section id="aba-inicio" class="space-y-4">
-            <div class="glass-card p-6 shadow-2xl relative overflow-hidden">
-                <div class="absolute -right-10 -top-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
-                <p class="text-xs uppercase tracking-wider text-gray-400 font-medium mb-1">Sobrou Este Mês</p>
-                <h2 id="saldo-mes" class="text-4xl font-extrabold tracking-tight text-white mb-6">R$ 0,00</h2>
-                
-                <div class="grid grid-cols-2 gap-4 pt-2 border-t border-white/5">
-                    <div>
-                        <p class="text-xs text-gray-400">Renda</p>
-                        <p id="total-renda" class="text-lg font-semibold text-emerald-400">R$ 0,00</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-400">Gastos</p>
-                        <p id="total-gastos" class="text-lg font-semibold text-rose-400">R$ 0,00</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div class="glass-card p-5">
-                    <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">Património</p>
-                    <p id="total-patrimonio" class="text-xl font-bold text-white">R$ 0,00</p>
-                </div>
-                <div class="glass-card p-5">
-                    <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">Contas a Pagar</p>
-                    <p id="total-contas" class="text-xl font-bold text-rose-400">R$ 0,00</p>
-                </div>
-            </div>
-
-            <div class="glass-card p-5">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="font-semibold text-sm text-white">Casa Própria</h3>
-                    <span class="text-xs text-gray-400">Previsão —</span>
-                </div>
-                <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden mb-3">
-                    <div id="meta-barra" class="bg-indigo-500 h-full w-[0%] transition-all duration-500"></div>
-                </div>
-                <div class="flex justify-between text-xs text-gray-400">
-                    <span id="meta-atual">R$ 0,00 · 0%</span>
-                    <span>faltam <strong id="meta-falta" class="text-rose-400">R$ 100.000,00</strong></span>
-                </div>
-            </div>
-
-            <div class="pt-2 pb-6">
-                <div class="flex justify-between items-center mb-3 px-1">
-                    <h3 class="text-sm font-semibold text-gray-300">Últimos lançamentos</h3>
-                </div>
-                <div id="lista-lancamentos" class="space-y-2">
-                    <div class="glass-card p-4 text-center text-xs text-gray-400">
-                        Registem a renda e os gastos no botão + aqui embaixo.
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ABA 2: GASTOS -->
-        <section id="aba-gastos" class="space-y-4 hidden">
-            <div class="glass-card p-5">
-                <h3 class="font-semibold text-sm text-white mb-3">Gastos por Pessoa</h3>
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
-                        <p class="text-xs text-gray-400">Gastos Bárbara</p>
-                        <p id="gastos-barbara" class="text-base font-bold text-rose-400">R$ 0,00</p>
-                    </div>
-                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
-                        <p class="text-xs text-gray-400">Gastos Igor</p>
-                        <p id="gastos-igor" class="text-base font-bold text-rose-400">R$ 0,00</p>
-                    </div>
-                </div>
-            </div>
-            <div class="glass-card p-5">
-                <h3 class="font-semibold text-sm text-white mb-3">Todos os Gastos do Mês</h3>
-                <div id="lista-gastos-mes" class="space-y-2">
-                    <div class="text-center text-xs text-gray-400 py-4">Nenhum gasto registado.</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ABA 3: RESERVAS -->
-        <section id="aba-reservas" class="space-y-4 hidden">
-            <div class="glass-card p-5">
-                <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">Património Total</p>
-                <h3 id="reserva-patrimonio" class="text-2xl font-bold text-white mb-2">R$ 0,00</h3>
-                <p class="text-xs text-gray-400">Inclui reservas, FGTS e investimentos.</p>
-            </div>
-            <div class="glass-card p-5">
-                <h3 class="font-semibold text-sm text-white mb-3">Reservas por Pessoa</h3>
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
-                        <p class="text-xs text-gray-400">Bárbara</p>
-                        <p id="reservas-barbara" class="text-base font-bold text-emerald-400">R$ 0,00</p>
-                    </div>
-                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
-                        <p class="text-xs text-gray-400">Igor</p>
-                        <p id="reservas-igor" class="text-base font-bold text-emerald-400">R$ 0,00</p>
-                    </div>
-                </div>
-            </div>
-            <div class="glass-card p-5">
-                <h3 class="font-semibold text-sm text-white mb-3">Histórico de Reservas / FGTS</h3>
-                <div id="lista-reservas" class="space-y-2">
-                    <div class="text-center text-xs text-gray-400 py-4">Nenhuma reserva registada.</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ABA 4: META -->
-        <section id="aba-meta" class="space-y-4 hidden">
-            <div class="glass-card p-5 space-y-3">
-                <h3 class="font-semibold text-sm text-white">Casa Própria</h3>
-                <p id="meta-valor-acumulado" class="text-2xl font-bold text-emerald-400">R$ 0,00</p>
-                <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-                    <div id="meta-barra-aba" class="bg-indigo-500 h-full w-[0%]"></div>
-                </div>
-                <p class="text-xs text-gray-400">Use a categoria "Casa Própria" para alimentar esta meta.</p>
-            </div>
-            <div class="glass-card p-5 space-y-3">
-                <h3 class="font-semibold text-sm text-white mb-2">Quem participa</h3>
-                <div class="space-y-2 text-sm font-medium text-white">
-                    <div class="flex items-center space-x-2">
-                        <span class="w-7 h-7 rounded-full bg-indigo-600/30 flex items-center justify-center text-xs">B</span>
-                        <span>Bárbara</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="w-7 h-7 rounded-full bg-indigo-600/30 flex items-center justify-center text-xs">I</span>
-                        <span>Igor</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ABA 5: RELATÓRIO -->
-        <section id="aba-relatorio" class="space-y-4 hidden">
-            <div class="glass-card p-5 space-y-3">
-                <h3 class="font-semibold text-sm text-white">Ritmo de vocês</h3>
-                <div id="relatorio-categorias" class="text-xs text-gray-400">
-                    Sem movimentos neste mês.
-                </div>
-            </div>
-            <div class="glass-card p-5 space-y-3">
-                <h3 class="font-semibold text-sm text-white">Média dos últimos 3 meses</h3>
-                <p class="text-xl font-bold text-emerald-400">R$ 0,00 / mês</p>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Barra de Navegação Inferior -->
-    <nav class="fixed bottom-0 left-0 right-0 glass-card border-t border-white/10 py-3 px-6 max-w-md mx-auto rounded-none backdrop-blur-xl flex justify-between items-center text-xs text-gray-400 z-40">
-        <button onclick="mudarAba('inicio')" id="btn-nav-inicio" class="text-white font-medium flex flex-col items-center">Início</button>
-        <button onclick="mudarAba('gastos')" id="btn-nav-gastos" class="hover:text-white flex flex-col items-center">Gastos</button>
-        <button onclick="mudarAba('reservas')" id="btn-nav-reservas" class="hover:text-white flex flex-col items-center">Reservas</button>
-        <button onclick="mudarAba('meta')" id="btn-nav-meta" class="hover:text-white flex flex-col items-center">Meta</button>
-        <button onclick="mudarAba('relatorio')" id="btn-nav-relatorio" class="hover:text-white flex flex-col items-center">Relatório</button>
-        <button onclick="abrirModal()" class="w-11 h-11 bg-indigo-600 hover:bg-indigo-500 rounded-full flex items-center justify-center text-white text-xl shadow-lg shadow-indigo-600/30 transition transform active:scale-95">
-            +
-        </button>
-    </nav>
-
-    <!-- Modal Adicionar Transação -->
-    <div id="modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-        <div class="glass-card p-6 w-full max-w-sm space-y-4 border border-white/10 max-h-[90vh] overflow-y-auto">
-            <h3 class="text-lg font-bold text-white">Novo Lançamento</h3>
-            <div>
-                <label class="text-xs text-gray-400 block mb-1">Responsável</label>
-                <select id="input-responsavel" class="w-full bg-[#131b31] border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-indigo-500">
-                    <option value="Bárbara">Bárbara</option>
-                    <option value="Igor">Igor</option>
-                </select>
-            </div>
-            <div>
-                <label class="text-xs text-gray-400 block mb-1">Descrição</label>
-                <input id="input-desc" type="text" placeholder="Ex: Salário, Supermercado..." class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-indigo-500">
-            </div>
-            <div>
-                <label class="text-xs text-gray-400 block mb-1">Valor (R$)</label>
-                <input id="input-valor" type="number" step="0.01" placeholder="0.00" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-indigo-500">
-            </div>
-            <div>
-                <label class="text-xs text-gray-400 block mb-1">Tipo</label>
-                <select id="input-tipo" class="w-full bg-[#131b31] border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-indigo-500">
-                    <option value="receita">Renda / Entrada / Reserva</option>
-                    <option value="gasto">Gasto / Despesa</option>
-                </select>
-            </div>
-            <div>
-                <label class="text-xs text-gray-400 block mb-1">Categoria</label>
-                <select id="input-categoria" class="w-full bg-[#131b31] border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-indigo-500">
-                    <option value="Geral">Geral</option>
-                    <option value="Salário">Salário</option>
-                    <option value="Casa Própria">Casa Própria (Meta)</option>
-                    <option value="FGTS">FGTS (Reserva)</option>
-                    <option value="Reserva de Emergência">Reserva de Emergência</option>
-                    <option value="Alimentação">Alimentação</option>
-                    <option value="Contas (Água/Luz/Internet)">Contas (Água/Luz/Internet)</option>
-                    <option value="Lazer">Lazer</option>
-                    <option value="Outros">Outros</option>
-                </select>
-            </div>
-            <div>
-                <label class="text-xs text-gray-400 block mb-1">Observações (Opcional)</label>
-                <textarea id="input-obs" placeholder="Detalhes, notas..." rows="2" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
-            </div>
-            <div class="flex space-x-3 pt-2">
-                <button onclick="fecharModal()" class="flex-1 bg-white/5 hover:bg-white/10 py-3 rounded-xl text-xs font-semibold text-gray-300 transition">Cancelar</button>
-                <button onclick="adicionarTransacao()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl text-xs font-semibold text-white transition shadow-lg shadow-indigo-600/30">Salvar</button>
-            </div>
-        </div>
+<header class="px-5 pt-8 pb-3 max-w-md mx-auto">
+  <div class="flex justify-between items-center">
+    <div>
+      <p class="text-xs text-indigo-300/70 font-semibold">Nosso Cofre <span id="status" class="text-gray-500 font-normal">· conectando</span></p>
+      <div class="flex items-center gap-1 -ml-1">
+        <button onclick="mudarMes(-1)" aria-label="Mês anterior" class="w-7 h-7 rounded-full hover:bg-white/10 text-gray-300">‹</button>
+        <h1 id="titulo-mes" class="text-xl font-bold min-w-[9rem] text-center"></h1>
+        <button onclick="mudarMes(1)" aria-label="Próximo mês" class="w-7 h-7 rounded-full hover:bg-white/10 text-gray-300">›</button>
+      </div>
     </div>
+    <div class="flex gap-2">
+      <button onclick="priv()" aria-label="Ocultar valores" class="w-9 h-9 rounded-full bg-white/5 border border-white/10">👁️</button>
+      <button onclick="abrirConfig()" aria-label="Configurações" class="w-9 h-9 rounded-full bg-white/5 border border-white/10">⚙️</button>
+      <button id="av-Bárbara" onclick="filtrarPessoa('Bárbara')" aria-label="Filtrar Bárbara" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-gray-300">B</button>
+      <button id="av-Igor" onclick="filtrarPessoa('Igor')" aria-label="Filtrar Igor" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-gray-300">I</button>
+    </div>
+  </div>
+</header>
 
-    <!-- Script de Gestão e Supabase -->
-    <script>
-        // --- CONFIGURAÇÃO FIXA (NÃO ALTERAR NO CÓDIGO DO GITHUB) ---
-        const SUPABASE_URL = 'https://ukdtjlgvngfolauruiln.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_ekY7I3o_QDYhcA0o-1RsrA_Bl67mmA5';
-        // ----------------------------------------------------------
+<main class="max-w-md mx-auto px-4 space-y-4">
+<section id="aba-inicio" class="space-y-4">
+  <div class="gc p-5">
+    <div class="flex items-center gap-4">
+      <div class="relative w-36 h-36 shrink-0">
+        <svg viewBox="0 0 120 120" class="-rotate-90 w-full h-full">
+          <circle cx="60" cy="60" r="58" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="4" stroke-dasharray="1.2 4.87"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="9"/>
+          <circle id="dial" cx="60" cy="60" r="50" fill="none" stroke="#6366f1" stroke-width="9" stroke-linecap="round" stroke-dasharray="314.16" stroke-dashoffset="314.16" style="transition:stroke-dashoffset .8s,stroke .8s"/>
+        </svg>
+        <div class="absolute inset-0 flex flex-col items-center justify-center"><span id="score" class="text-3xl font-extrabold">–</span><span class="text-[10px] text-gray-400">saúde do mês</span></div>
+      </div>
+      <div class="min-w-0">
+        <p id="score-label" class="text-sm font-semibold mb-2"></p>
+        <p class="text-xs text-gray-400">Sobrou</p>
+        <p id="saldo-mes" class="text-2xl font-extrabold mb-2"></p>
+        <p class="text-xs text-gray-400">Renda <b id="total-renda" class="text-emerald-400"></b></p>
+        <p class="text-xs text-gray-400">Gastos <b id="total-gastos" class="text-rose-400"></b></p>
+      </div>
+    </div>
+    <p id="projecao" class="text-xs text-gray-400 mt-4 pt-3 border-t border-white/5"></p>
+  </div>
+  <div id="insights" class="space-y-2"></div>
+  <div class="gc p-5 flex items-center gap-4" onclick="mudarAba('cofre')" role="button" tabindex="0">
+    <svg viewBox="0 0 100 90" class="w-16 h-14 shrink-0"><use href="#casa"/></svg>
+    <div class="flex-1"><div class="flex justify-between text-sm font-semibold"><span>Casa Própria</span><span id="mini-pct" class="num text-indigo-300"></span></div>
+      <div class="bar my-2"><i id="mini-bar" class="bg-indigo-500" style="width:0"></i></div>
+      <p id="mini-prev" class="text-[11px] text-gray-400"></p></div>
+  </div>
+  <div class="pb-6">
+    <div class="flex justify-between items-center mb-2 px-1"><h3 class="text-sm font-semibold text-gray-300">Lançamentos</h3><button onclick="exportarCSV()" class="text-xs text-indigo-300">Exportar CSV</button></div>
+    <input oninput="state.busca=this.value.toLowerCase();render()" placeholder="Buscar" aria-label="Buscar" class="inp mb-3 text-xs">
+    <div id="lista" class="space-y-2"></div>
+  </div>
+</section>
 
-        let supabaseClient = null;
+<section id="aba-gastos" class="space-y-4 hidden">
+  <div class="gc p-5"><h3 class="font-semibold text-sm mb-3">Orçamento por categoria</h3><div id="orcamento" class="space-y-3"></div></div>
+  <div class="gc p-5"><h3 class="font-semibold text-sm mb-3">Mapa de calor do mês</h3>
+    <div class="grid grid-cols-7 gap-1 text-center text-[9px] text-gray-500 mb-1"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
+    <div id="heat" class="grid grid-cols-7 gap-1"></div></div>
+  <div class="gc p-5"><h3 class="font-semibold text-sm mb-3">Gastos do mês</h3><div id="lista-gastos" class="space-y-2"></div></div>
+</section>
 
-        // INICIALIZAÇÃO AGRESSIVA: Força a conexão com as chaves acima, ignorando o localStorage
-        if (SUPABASE_URL && SUPABASE_URL !== 'SUA_SUPABASE_URL_AQUI') {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log("Conexão Supabase iniciada.");
-            carregarDados();
-            subcreverTempoReal();
-        } else {
-            console.error("Supabase não configurado.");
-            abrirConfigSync(); // Pede configuração se as chaves estiverem em branco
-        }
+<section id="aba-cofre" class="space-y-4 hidden">
+  <div class="gc p-5 text-center">
+    <svg viewBox="0 0 100 90" class="w-40 h-36 mx-auto"><use href="#casa"/></svg>
+    <p id="casa-valor" class="text-2xl font-bold text-emerald-400 num"></p>
+    <p id="casa-detalhe" class="text-xs text-gray-400 mt-1"></p>
+  </div>
+  <div class="gc p-5 space-y-3"><h3 class="font-semibold text-sm">Plano de aporte mensal</h3>
+    <div class="grid grid-cols-2 gap-3">
+      <div><label class="text-[10px] text-gray-400" for="p-aporte">Aporte por mês (R$)</label><input id="p-aporte" type="number" inputmode="decimal" oninput="plano()" class="inp"></div>
+      <div><label class="text-[10px] text-gray-400" for="p-rend">Rendimento (% ao mês)</label><input id="p-rend" type="number" step="0.01" inputmode="decimal" oninput="plano()" class="inp"></div></div>
+    <div id="plano" class="space-y-1"></div>
+    <button onclick="registrarAporte()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl text-xs font-semibold">Registrar aporte do mês</button>
+    <p class="text-[11px] text-gray-500">Salva no Supabase na categoria Casa Própria, dividido igualmente entre Bárbara e Igor.</p></div>
+  <div class="gc p-5 space-y-3"><h3 class="font-semibold text-sm">Quem contribui para a casa (com FGTS)</h3><div id="casa-pessoas" class="space-y-3"></div></div>
+  <div class="gc p-5"><p class="text-xs text-gray-400">Patrimônio total</p><p id="patrimonio" class="text-2xl font-bold mb-3 num"></p>
+    <div class="grid grid-cols-2 gap-3">
+      <div class="bg-white/5 p-3 rounded-xl"><p class="text-xs text-gray-400">Bárbara</p><p id="res-b" class="font-bold text-emerald-400 num"></p></div>
+      <div class="bg-white/5 p-3 rounded-xl"><p class="text-xs text-gray-400">Igor</p><p id="res-i" class="font-bold text-emerald-400 num"></p></div></div></div>
+  <div class="gc p-5"><div class="flex justify-between items-center mb-3"><h3 class="font-semibold text-sm">Minhas caixinhas</h3><button onclick="abrirCaixa()" class="text-xs text-indigo-300">+ Nova caixinha</button></div>
+    <div id="caixas" class="grid grid-cols-2 gap-3"></div></div>
+  <div class="gc p-5"><h3 class="font-semibold text-sm mb-3">Histórico de reservas</h3><div id="lista-res" class="space-y-2"></div></div>
+</section>
 
-        // Esta função agora avisa o utilizador para alterar o código,
-        // mas não altera o comportamento de inicialização agressiva acima.
-        function abrirConfigSync() {
-             const confirmar = confirm("As chaves do Supabase estão definidas no código fonte. Se a conexão falhou, verifique se a URL e a Key estão corretas no ficheiro index.html no GitHub. Deseja tentar reconfigurar manualmente na cache?");
-             if(confirmar) {
-                const url = prompt("Insira a sua SUPABASE_URL (ex: https://xyz.supabase.co):", SUPABASE_URL);
-                const key = prompt("Insira a sua SUPABASE_ANON_KEY:", SUPABASE_ANON_KEY);
-                if (url && key) {
-                    localStorage.setItem('s_url', url.trim());
-                    localStorage.setItem('s_key', key.trim());
-                    location.reload();
-                }
-             }
-        }
+<section id="aba-relatorio" class="space-y-4 hidden">
+  <div class="gc p-5"><h3 class="font-semibold text-sm mb-1">Sobra dos últimos 6 meses</h3><p id="media" class="text-xs text-gray-400 mb-3"></p>
+    <div id="seis" class="flex items-end justify-between gap-2 h-32"></div></div>
+  <div class="gc p-5"><h3 class="font-semibold text-sm mb-3">Gastos por categoria</h3><div id="cats" class="space-y-3 text-xs text-gray-400"></div></div>
+</section>
+</main>
 
-        function mudarAba(aba) {
-            ['inicio', 'gastos', 'reservas', 'meta', 'relatorio'].forEach(a => {
-                document.getElementById(`aba-${a}`).classList.add('hidden');
-                document.getElementById(`btn-nav-${a}`).classList.remove('text-white', 'font-medium');
-                document.getElementById(`btn-nav-${a}`).classList.add('text-gray-400');
-            });
-            document.getElementById(`aba-${aba}`).classList.remove('hidden');
-            document.getElementById(`btn-nav-${aba}`).classList.add('text-white', 'font-medium');
-            document.getElementById(`btn-nav-${aba}`).classList.remove('text-gray-400');
-        }
+<svg width="0" height="0" class="absolute"><defs>
+  <clipPath id="cl"><path d="M50 6 L94 44 H84 V86 H16 V44 H6 Z"/></clipPath>
+  <symbol id="casa" viewBox="0 0 100 90"><path d="M50 6 L94 44 H84 V86 H16 V44 H6 Z" fill="rgba(255,255,255,.06)" stroke="rgba(165,180,252,.6)" stroke-width="2" stroke-linejoin="round"/>
+    <rect class="fill-r" x="0" y="86" width="100" height="0" fill="#6366f1" opacity=".85" clip-path="url(#cl)"/><rect x="42" y="62" width="16" height="24" rx="2" fill="rgba(10,14,26,.6)"/></symbol></defs></svg>
 
-        function abrirModal() {
-            document.getElementById('modal').classList.remove('hidden');
-        }
+<nav class="fixed bottom-0 left-0 right-0 gc border-t border-white/10 py-2 px-4 max-w-md mx-auto rounded-none flex justify-between items-center text-[11px] text-gray-400 z-40" style="padding-bottom:calc(.5rem + env(safe-area-inset-bottom,0px))">
+  <button onclick="mudarAba('inicio')" id="nav-inicio" class="flex flex-col items-center w-14"><span>🏠</span>Início</button>
+  <button onclick="mudarAba('gastos')" id="nav-gastos" class="flex flex-col items-center w-14"><span>💸</span>Gastos</button>
+  <button onclick="abrirModal()" aria-label="Novo lançamento" class="w-12 h-12 -mt-6 bg-indigo-600 hover:bg-indigo-500 rounded-full text-2xl shadow-lg shadow-indigo-600/40 active:scale-95 transition">+</button>
+  <button onclick="mudarAba('cofre')" id="nav-cofre" class="flex flex-col items-center w-14"><span>🏦</span>Cofre</button>
+  <button onclick="mudarAba('relatorio')" id="nav-relatorio" class="flex flex-col items-center w-14"><span>📊</span>Relatório</button>
+</nav>
 
-        function fecharModal() {
-            document.getElementById('modal').classList.add('hidden');
-        }
+<div id="modal" class="ov fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 items-center justify-center p-4" onclick="if(event.target===this)fechar('modal')">
+  <div class="gc p-6 w-full max-w-sm space-y-3 max-h-[90vh] overflow-y-auto" style="background:#131b31">
+    <h3 class="text-lg font-bold">Novo lançamento</h3>
+    <input id="rapido" oninput="rapido(this.value)" class="inp" placeholder="Escreva rápido: mercado 85,90 igor" aria-label="Lançamento rápido">
+    <p class="text-[11px] text-gray-500 -mt-2">Preenche os campos abaixo. Use "salário" ou "recebi" para entradas.</p>
+    <div class="grid grid-cols-2 gap-2"><button id="tp-gasto" onclick="setTipo('gasto')" class="chip on">Gasto</button><button id="tp-receita" onclick="setTipo('receita')" class="chip">Renda / Reserva</button></div>
+    <div class="grid grid-cols-2 gap-3">
+      <select id="i-resp" class="inp" aria-label="Responsável"><option>Bárbara</option><option>Igor</option></select>
+      <input id="i-data" type="date" class="inp" aria-label="Data"></div>
+    <input id="i-desc" class="inp" placeholder="Descrição" aria-label="Descrição">
+    <input id="i-valor" type="number" step="0.01" inputmode="decimal" placeholder="Valor (R$)" class="inp" aria-label="Valor">
+    <select id="i-cat" class="inp" aria-label="Categoria"></select>
+    <textarea id="i-obs" rows="2" class="inp" placeholder="Observações (opcional)"></textarea>
+    <div class="flex gap-3 pt-1"><button onclick="fechar('modal')" class="flex-1 bg-white/5 py-3 rounded-xl text-xs font-semibold text-gray-300">Cancelar</button>
+      <button id="btn-salvar" onclick="salvar()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl text-xs font-semibold">Salvar lançamento</button></div>
+  </div>
+</div>
 
-        async function carregarDados() {
-            if (!supabaseClient) return;
-            const { data, error } = await supabaseClient.from('transacoes').select('*').order('id', { ascending: false });
-            if (error) {
-                console.error('Erro ao carregar:', error);
-                // Se falhar, tenta limpar o cliente e reconfigurar do localStorage como fallback
-                supabaseClient = null; 
-                const savedUrl = localStorage.getItem('s_url');
-                if(savedUrl) {
-                     supabaseClient = supabase.createClient(savedUrl, localStorage.getItem('s_key'));
-                     carregarDados();
-                }
-                return;
-            }
-            atualizarInterface(data);
-        }
+<div id="modal-cfg" class="ov fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 items-center justify-center p-4" onclick="if(event.target===this)fechar('modal-cfg')">
+  <div class="gc p-6 w-full max-w-sm space-y-3 max-h-[90vh] overflow-y-auto" style="background:#131b31">
+    <h3 class="text-lg font-bold">Configurações</h3>
+    <label class="text-xs text-gray-400 block" for="c-meta">Meta da Casa Própria (R$)</label>
+    <input id="c-meta" type="number" inputmode="decimal" class="inp">
+    <p class="text-xs text-gray-400 pt-1">Limite mensal por categoria (R$, vazio = sem limite)</p>
+    <div id="c-orc" class="grid grid-cols-2 gap-2"></div>
+    <details class="text-xs text-gray-400"><summary class="cursor-pointer py-1">Conexão com o Supabase</summary>
+      <div class="space-y-2 pt-2"><input id="c-url" class="inp" placeholder="SUPABASE_URL"><input id="c-key" class="inp" placeholder="SUPABASE_ANON_KEY">
+      <button onclick="ls.del('s_url');ls.del('s_key');location.reload()" class="text-rose-400">Voltar à conexão padrão</button></div></details>
+    <div class="flex gap-3"><button onclick="fechar('modal-cfg')" class="flex-1 bg-white/5 py-3 rounded-xl text-xs font-semibold text-gray-300">Cancelar</button>
+      <button onclick="salvarCfg()" class="flex-1 bg-indigo-600 py-3 rounded-xl text-xs font-semibold">Salvar</button></div>
+  </div>
+</div>
+<div id="modal-cx" class="ov fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 items-center justify-center p-4" onclick="if(event.target===this)fechar('modal-cx')">
+  <div class="gc p-6 w-full max-w-sm space-y-3" style="background:#131b31">
+    <h3 class="text-lg font-bold">Nova caixinha</h3>
+    <div class="grid grid-cols-4 gap-3"><input id="cx-emoji" class="inp text-center" value="💰" maxlength="2" aria-label="Ícone"><input id="cx-nome" class="inp col-span-3" placeholder="Nome (ex: Viagem, Carro)" aria-label="Nome"></div>
+    <input id="cx-meta" type="number" inputmode="decimal" class="inp" placeholder="Meta em R$ (opcional)" aria-label="Meta">
+    <div class="flex gap-3"><button onclick="fechar('modal-cx')" class="flex-1 bg-white/5 py-3 rounded-xl text-xs font-semibold text-gray-300">Cancelar</button>
+      <button onclick="criarCaixa()" class="flex-1 bg-indigo-600 py-3 rounded-xl text-xs font-semibold">Criar caixinha</button></div>
+  </div></div>
+<div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-28 z-[60] px-4 py-2 rounded-full text-xs font-medium bg-white text-gray-900 shadow-xl opacity-0 pointer-events-none transition-opacity"></div>
 
-        function subcreverTempoReal() {
-            if (!supabaseClient) return;
-            supabaseClient
-                .channel('public:transacoes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'transacoes' }, payload => {
-                    carregarDados();
-                })
-                .subscribe();
-        }
+<script>
+const mem={};const ls={get:k=>{try{return localStorage.getItem(k)}catch(e){return k in mem?mem[k]:null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){mem[k]=String(v)}},del:k=>{try{localStorage.removeItem(k)}catch(e){delete mem[k]}}};
+addEventListener('error',e=>{const s=document.getElementById('status');if(s)s.textContent='· erro: '+e.message});
+const URL0='https://ukdtjlgvngfolauruiln.supabase.co',KEY0='sb_publishable_ekY7I3o_QDYhcA0o-1RsrA_Bl67mmA5';
+const RES=['Casa Própria','FGTS','Reserva de Emergência'];
+const CATS={gasto:['Geral','Cartão de crédito','Água','Luz','Internet','Telefone/Celular','Gás','Moradia (aluguel/financiamento)','Condomínio','Casa e manutenção','Supermercado','Restaurantes e delivery','Transporte','Combustível','Saúde','Farmácia','Educação','Assinaturas','Lazer','Viagens','Vestuário','Beleza e cuidados','Pets','Presentes','Empréstimos e dívidas','Impostos e taxas','Doações','Outros'],receita:['Salário','Geral','Casa Própria','FGTS','Reserva de Emergência','Outros']};
+const DICA={'Cartão de crédito':/cart[ãa]o|fatura|nubank/,Água:/(^|\s)(água|agua)(\s|$)|saneamento|sabesp|copasa/,Luz:/(^|\s)luz(\s|$)|energia|enel|cemig/,Internet:/internet|wi-?fi|fibra/,'Telefone/Celular':/celular|telefone|plano (tim|vivo|claro)|recarga/,Gás:/(^|\s)(gás|gas)(\s|$)|botij/,Condomínio:/condom/,'Moradia (aluguel/financiamento)':/aluguel|financiamento/,'Casa e manutenção':/reforma|conserto|encanador|eletricista|móve|movel/,Supermercado:/mercado|super|feira|açougue|acougue|hortifruti/,'Restaurantes e delivery':/ifood|restaurante|lanche|pizza|delivery|padaria|cafeteria/,Combustível:/gasolina|combust|etanol|diesel/,Transporte:/uber|ônibus|onibus|estacion|pedágio|99|metrô|metro/,Farmácia:/farm[áa]cia|remédio|remedio/,Saúde:/médic|medic|consulta|exame|dentista|plano de saúde/,Educação:/escola|curso|faculdade|mensalidade|livro/,Assinaturas:/netflix|spotify|assinatura|prime|disney|youtube|hbo/,Lazer:/cinema|bar|show|passeio|jogo|festa/,Viagens:/viagem|hotel|passagem|hospedagem/,Vestuário:/roupa|sapato|tênis|tenis|camisa/,'Beleza e cuidados':/salão|salao|barbeiro|cabelo|manicure|estética/,Pets:/(^|\s)pet|ração|racao|veterin/,Presentes:/presente|aniversário/,'Empréstimos e dívidas':/empréstimo|emprestimo|parcela|dívida|divida/,'Impostos e taxas':/iptu|ipva|imposto|taxa|multa/,Doações:/doação|doacao|dízimo|dizimo/};
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const state={all:[],mes:new Date(),pessoa:null,busca:'',tipo:'gasto',loading:true,caixas:[],caixasErro:false};
+const isRes=c=>RES.includes(c)||state.caixas.some(x=>x.nome===c);state.mes.setDate(1);
+let sb=null;
+const $=i=>document.getElementById(i);
+const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const S=(i,v)=>{const e=$(i);e.textContent=v;e.classList.add('num')};
+const ck=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+const dt=t=>String(t.data||t.created_at||'').slice(0,10);
+const soma=a=>a.reduce((s,t)=>s+Number(t.valor),0);
+const resp=t=>t.responsavel||'Bárbara';
+const meta=()=>Number(ls.get('meta_casa'))||100000;
+const orc=()=>{try{return JSON.parse(ls.get('orc'))||{}}catch(e){return{}}};
+const toast=m=>{const e=$('toast');e.textContent=m;e.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.opacity=0,2400)};
+const fechar=i=>$(i).classList.add('hidden');
+const priv=()=>{document.body.classList.toggle('priv');ls.set('priv',document.body.classList.contains('priv')?1:'')};
 
-        async function adicionarTransacao() {
-            const responsavel = document.getElementById('input-responsavel').value;
-            const desc = document.getElementById('input-desc').value;
-            const valor = parseFloat(document.getElementById('input-valor').value);
-            const tipo = document.getElementById('input-tipo').value;
-            const categoria = document.getElementById('input-categoria').value;
-            const observacoes = document.getElementById('input-obs').value;
+function iniciar(){
+  if(ls.get('priv'))document.body.classList.add('priv');
+  try{sb=supabase.createClient(ls.get('s_url')||URL0,ls.get('s_key')||KEY0,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+    sb.channel('public:transacoes').on('postgres_changes',{event:'*',schema:'public',table:'transacoes'},carregar).on('postgres_changes',{event:'*',schema:'public',table:'caixinhas'},carregar).subscribe()}catch(e){}
+  $('p-aporte').value=ls.get('aporte')||2000;$('p-rend').value=ls.get('rend')||0;setTipo('gasto');$('i-data').value=new Date().toISOString().slice(0,10);render();carregar();
+}
+async function carregar(){
+  if(!sb)return;
+  const{data,error}=await sb.from('transacoes').select('*').order('id',{ascending:false});
+  const cx=await sb.from('caixinhas').select('*').order('id');state.caixas=cx.error?[]:(cx.data||[]);state.caixasErro=!!cx.error;state.loading=false;
+  if(error){$('status').textContent='· sem conexão';toast('Erro ao carregar: '+error.message)}
+  else{state.all=data||[];$('status').textContent='· sincronizado'}
+  render();
+}
+const mudarMes=d=>{state.mes.setMonth(state.mes.getMonth()+d);render()};
+const filtrarPessoa=p=>{state.pessoa=state.pessoa===p?null:p;render()};
+function mudarAba(a){
+  ['inicio','gastos','cofre','relatorio'].forEach(x=>{$('aba-'+x).classList.toggle('hidden',x!==a);const b=$('nav-'+x);b.classList.toggle('text-white',x===a);b.classList.toggle('font-semibold',x===a)});
+  scrollTo({top:0});
+}
+function resumo(k){
+  const ts=state.all.filter(t=>dt(t).startsWith(k));
+  const renda=soma(ts.filter(t=>t.tipo==='receita'&&!isRes(t.categoria))),gastos=soma(ts.filter(t=>t.tipo==='gasto'));
+  return{ts,renda,gastos,sobra:renda-gastos};
+}
+function item(t){
+  const rec=t.tipo==='receita',[y,m,d]=dt(t).split('-');
+  return `<div class="gc p-3 flex justify-between items-center gap-2 text-sm"><div class="flex items-center gap-3 min-w-0">
+    <div class="w-8 h-8 shrink-0 rounded-full ${rec?'bg-emerald-500/15 text-emerald-400':'bg-rose-500/15 text-rose-400'} flex items-center justify-center font-bold">${rec?'↓':'↑'}</div>
+    <div class="min-w-0"><p class="font-medium truncate">${esc(t.descricao)}</p><p class="text-[10px] text-gray-400">${d?`${d}/${m}/${y}`:''} · ${esc(resp(t))} · ${esc(t.categoria||'Geral')}</p>
+    ${t.observacoes?`<p class="text-[10px] text-gray-500 italic truncate">${esc(t.observacoes)}</p>`:''}</div></div>
+    <div class="flex items-center gap-2 shrink-0"><span class="num font-semibold ${rec?'text-emerald-400':'text-rose-400'}">${rec?'+':'-'} ${brl(t.valor)}</span>
+    <button onclick="apagar(${t.id})" aria-label="Apagar" class="w-7 h-7 rounded-full bg-rose-500/10 hover:bg-rose-500/30 text-xs">🗑️</button></div></div>`;
+}
+const vazio=t=>`<div class="text-center text-xs text-gray-400 py-4">${t}</div>`;
 
-            if (!supabaseClient) {
-                alert('Base de dados não configurada. Clique na engrenagem ⚙️ no topo.');
-                abrirConfigSync();
-                return;
-            }
+function render(){
+  $('titulo-mes').textContent=`${MESES[state.mes.getMonth()]} ${state.mes.getFullYear()}`;
+  ['Bárbara','Igor'].forEach(p=>{const on=state.pessoa===p;$('av-'+p).classList.toggle('bg-indigo-600',on);$('av-'+p).classList.toggle('text-white',on)});
+  if(state.loading){$('lista').innerHTML='<div class="sk"></div>'.repeat(3);return}
+  const k=ck(state.mes),r=resumo(k),pf=t=>!state.pessoa||resp(t)===state.pessoa,doMes=r.ts.filter(pf);
+  const ant=new Date(state.mes);ant.setMonth(ant.getMonth()-1);const ra=resumo(ck(ant));
+  const lim=orc(),gcat={};r.ts.filter(t=>t.tipo==='gasto').forEach(t=>{const c=t.categoria||'Geral';gcat[c]=(gcat[c]||0)+Number(t.valor)});
+  const estourou=Object.keys(lim).filter(c=>lim[c]>0&&(gcat[c]||0)>lim[c]);
 
-            if (!desc || isNaN(valor) || valor <= 0) {
-                alert('Por favor, preencha uma descrição e um valor válido.');
-                return;
-            }
+  // Saúde do mês
+  const tem=r.renda>0||r.gastos>0,taxa=r.renda>0?r.sobra/r.renda:(r.gastos>0?-1:0);
+  const score=!tem?0:Math.round(Math.max(0,Math.min(70,taxa/.3*70))+Math.max(0,30-estourou.length*10));
+  const cor=!tem?'#6b7280':score>=70?'#10b981':score>=40?'#f59e0b':'#f43f5e';
+  $('dial').style.strokeDashoffset=314.16*(1-score/100);$('dial').style.stroke=cor;
+  $('score').textContent=tem?score:'–';
+  $('score-label').textContent=!tem?'Sem lançamentos neste mês':score>=70?'Cofre tranquilo':score>=40?'Atenção aos gastos':'Mês apertado';$('score-label').style.color=cor;
+  S('saldo-mes',brl(r.sobra));$('saldo-mes').className=`num text-2xl font-extrabold mb-2 ${r.sobra<0?'text-rose-400':''}`;
+  S('total-renda',brl(r.renda));S('total-gastos',brl(r.gastos));
 
-            const { error } = await supabaseClient.from('transacoes').insert([{ 
-                responsavel: responsavel,
-                descricao: desc, 
-                valor: valor, 
-                tipo: tipo, 
-                categoria: categoria,
-                observacoes: observacoes 
-            }]);
+  // Projeção
+  const hoje=new Date(),atual=ck(hoje)===k,dias=new Date(state.mes.getFullYear(),state.mes.getMonth()+1,0).getDate();
+  $('projecao').textContent=atual&&r.gastos>0?`No ritmo de hoje (${brl(r.gastos/hoje.getDate())}/dia), o mês fecha com ${brl(r.gastos/hoje.getDate()*dias)} em gastos.`:r.gastos>0?`Média de ${brl(r.gastos/dias)} por dia neste mês.`:'Registre o primeiro gasto no botão +.';
+  $('projecao').classList.add('num');
 
-            if (error) {
-                alert('Erro ao guardar: ' + error.message);
-            } else {
-                fecharModal();
-                document.getElementById('input-desc').value = '';
-                document.getElementById('input-valor').value = '';
-                document.getElementById('input-obs').value = '';
-                carregarDados();
-            }
-        }
+  // Insights
+  const ins=[];const top=Object.entries(gcat).sort((a,b)=>b[1]-a[1])[0];
+  if(top)ins.push(['📌',`${top[0]} é a maior despesa: ${brl(top[1])} (${(top[1]/r.gastos*100).toFixed(0)}% dos gastos).`]);
+  if(ra.gastos>0&&r.gastos>0){const d=(r.gastos-ra.gastos)/ra.gastos*100;ins.push([d>0?'📈':'📉',`Gastos ${d>0?'subiram':'caíram'} ${Math.abs(d).toFixed(0)}% em relação ao mês anterior.`])}
+  estourou.forEach(c=>ins.push(['🚨',`${c} passou do limite de ${brl(lim[c])}.`]));
+  $('insights').innerHTML=ins.slice(0,3).map(([i,t])=>`<div class="gc px-4 py-3 text-xs flex gap-3 items-center"><span class="text-base">${i}</span><span class="num text-gray-300">${esc(t)}</span></div>`).join('');
 
-        async function apagarTransacao(id) {
-            if (!confirm('Deseja realmente apagar este lançamento?')) return;
-            const { error } = await supabaseClient.from('transacoes').delete().eq('id', id);
-            if (error) {
-                alert('Erro ao apagar: ' + error.message);
-            } else {
-                carregarDados();
-            }
-        }
+  // Cofre e casa
+  const res=state.all.filter(t=>t.tipo==='receita'&&isRes(t.categoria)),casaL=res.filter(t=>t.categoria==='Casa Própria'||t.categoria==='FGTS'),casa=soma(casaL);
+  const m=meta(),prog=Math.min(casa/m*100,100),falta=Math.max(m-casa,0);
+  document.querySelectorAll('.fill-r').forEach(e=>{const h=80*prog/100;e.setAttribute('y',86-h);e.setAttribute('height',h)});
+  const ritmo=ritmoM(casaL.filter(t=>t.categoria==='Casa Própria'))||Number(ls.get('aporte'))||0;
+  let prev='Faça o primeiro aporte na categoria Casa Própria.',det=`Meta de ${brl(m)}.`;
+  if(!falta){prev='Meta atingida! 🎉';det=prev}else if(ritmo>0){const n=Math.ceil(falta/ritmo),d=new Date();d.setMonth(d.getMonth()+n);prev=`Previsão: ${MESES[d.getMonth()]} de ${d.getFullYear()}`;det=`Faltam ${brl(falta)}. No ritmo de ${brl(ritmo)}/mês, são cerca de ${n} meses.`}
+  state.casa=casa;plano();S('mini-pct',prog.toFixed(1)+'%');$('mini-bar').style.width=prog+'%';S('mini-prev',prev);S('casa-valor',brl(casa));S('casa-detalhe',det);
+  $('casa-pessoas').innerHTML=['Bárbara','Igor'].map(p=>{const v=soma(casaL.filter(t=>resp(t)===p));return `<div><div class="flex justify-between text-sm"><span>${p}</span><b class="num text-emerald-400">${brl(v)}</b></div><div class="bar mt-1"><i class="bg-indigo-500" style="width:${casa?v/casa*100:0}%"></i></div></div>`}).join('');
+  S('patrimonio',brl(soma(res)));S('res-b',brl(soma(res.filter(t=>resp(t)==='Bárbara'))));S('res-i',brl(soma(res.filter(t=>resp(t)==='Igor'))));
+  $('caixas').innerHTML=state.caixasErro?'<p class="col-span-2 text-xs text-amber-300">Tabela "caixinhas" não encontrada no Supabase. Crie com o SQL fornecido.</p>':state.caixas.length?state.caixas.map(c=>{
+    const l=res.filter(t=>t.categoria===c.nome),v=soma(l),mt=Number(c.meta)||0,pc=mt?Math.min(v/mt*100,100):0,rc=ritmoM(l);
+    const pv=mt&&v<mt&&rc>0?` · ~${Math.ceil((mt-v)/rc)} meses`:'';
+    return `<div class="bg-white/5 rounded-2xl p-3 border border-white/5"><div class="flex justify-between items-start"><span class="text-xl">${esc(c.emoji||'💰')}</span><button onclick="apagarCaixa(${c.id})" aria-label="Apagar caixinha" class="text-[10px] opacity-60">🗑️</button></div>
+    <p class="text-xs text-gray-400 truncate">${esc(c.nome)}</p><p class="num font-bold">${brl(v)}</p>
+    ${mt?`<div class="bar my-1"><i class="bg-emerald-500" style="width:${pc}%"></i></div><p class="num text-[10px] text-gray-400">${pc.toFixed(0)}% de ${brl(mt)}${pv}</p>`:''}
+    <button onclick="guardarEm(${c.id})" class="mt-2 w-full bg-indigo-600/80 hover:bg-indigo-500 rounded-lg py-1.5 text-[11px] font-semibold">Guardar</button></div>`}).join(''):'<p class="col-span-2 text-xs text-gray-400">Nenhuma caixinha ainda. Crie uma para separar dinheiro para viagem, carro, reforma…</p>';
+  const rf=res.filter(pf);$('lista-res').innerHTML=rf.length?rf.map(item).join(''):vazio('Nenhuma reserva registrada.');
 
-        function atualizarInterface(transacoes) {
-            let rendaTotal = 0;
-            let gastosTotal = 0;
-            let casaPropriaTotal = 0;
-            let patrimonioTotal = 0;
-            
-            let gastosBarbara = 0;
-            let gastosIgor = 0;
-            let reservasBarbara = 0;
-            let reservasIgor = 0;
+  // Lista
+  const l=doMes.filter(t=>!state.busca||`${t.descricao} ${t.categoria}`.toLowerCase().includes(state.busca));
+  $('lista').innerHTML=l.length?l.map(item).join(''):`<div class="gc p-4 text-center text-xs text-gray-400">Nenhum lançamento aqui. Toque em + para registrar.</div>`;
+  const g=doMes.filter(t=>t.tipo==='gasto');$('lista-gastos').innerHTML=g.length?g.map(item).join(''):vazio('Nenhum gasto registrado.');
 
-            const listaEl = document.getElementById('lista-lancamentos');
-            const listaGastosEl = document.getElementById('lista-gastos-mes');
-            const listaReservasEl = document.getElementById('lista-reservas');
-            
-            listaEl.innerHTML = '';
-            listaGastosEl.innerHTML = '';
-            listaReservasEl.innerHTML = '';
+  // Orçamento
+  const lc=Object.keys(lim).filter(c=>lim[c]>0);
+  $('orcamento').innerHTML=lc.length?lc.map(c=>{const v=gcat[c]||0,p=v/lim[c]*100;return `<div><div class="flex justify-between text-xs mb-1"><span>${esc(c)}</span><span class="num ${p>100?'text-rose-400':'text-gray-400'}">${brl(v)} de ${brl(lim[c])}</span></div><div class="bar"><i style="width:${Math.min(p,100)}%;background:${p>100?'#f43f5e':p>80?'#f59e0b':'#10b981'}"></i></div></div>`}).join(''):'<p class="text-xs text-gray-400">Defina limites por categoria em ⚙️ e acompanhe aqui.</p>';
 
-            if (transacoes.length === 0) {
-                listaEl.innerHTML = `<div class="glass-card p-4 text-center text-xs text-gray-400">Registem a renda e os gastos no botão + aqui embaixo.</div>`;
-                listaGastosEl.innerHTML = `<div class="text-center text-xs text-gray-400 py-4">Nenhum gasto registado.</div>`;
-                listaReservasEl.innerHTML = `<div class="text-center text-xs text-gray-400 py-4">Nenhuma reserva registada.</div>`;
-            }
+  // Mapa de calor
+  const dg={};r.ts.filter(t=>t.tipo==='gasto'&&pf(t)).forEach(t=>{const d=+dt(t).slice(8,10);dg[d]=(dg[d]||0)+Number(t.valor)});
+  const mx=Math.max(1,...Object.values(dg)),off=state.mes.getDay();let h='<span></span>'.repeat(off);
+  for(let d=1;d<=dias;d++){const v=dg[d]||0;h+=`<button onclick="toast('Dia ${d}: ${brl(v)}')" aria-label="Dia ${d}" class="aspect-square rounded-md text-[9px] text-white/70" style="background:${v?`rgba(244,63,94,${.2+.7*v/mx})`:'rgba(255,255,255,.05)'}">${d}</button>`}
+  $('heat').innerHTML=h;
 
-            transacoes.forEach((t, index) => {
-                const valorNum = Number(t.valor);
-                const resp = t.responsavel || 'Bárbara';
+  // Relatório
+  const hist=[5,4,3,2,1,0].map(i=>{const d=new Date(state.mes);d.setMonth(d.getMonth()-i);return{d,...resumo(ck(d))}}),mh=Math.max(1,...hist.map(x=>Math.abs(x.sobra)));
+  $('seis').innerHTML=hist.map(x=>`<div class="flex-1 flex flex-col items-center justify-end h-full gap-1"><div class="w-full rounded-t-md" style="height:${Math.max(4,Math.abs(x.sobra)/mh*80)}%;background:${x.sobra<0?'#f43f5e':'#10b981'}" title="${brl(x.sobra)}"></div><span class="text-[10px] text-gray-400">${MESES[x.d.getMonth()].slice(0,3)}</span></div>`).join('');
+  S('media',`Média de ${brl(hist.slice(3).reduce((s,x)=>s+x.sobra,0)/3)} por mês nos últimos 3 meses.`);
+  const cs=Object.entries(gcat).sort((a,b)=>b[1]-a[1]),cores=['#6366f1','#f43f5e','#10b981','#f59e0b','#06b6d4','#a855f7','#ec4899','#84cc16'];
+  $('cats').innerHTML=cs.length?cs.map(([c,v],i)=>`<div><div class="flex justify-between text-sm text-white mb-1"><span>${esc(c)}</span><span class="num">${brl(v)} <span class="text-xs text-gray-400">${(v/r.gastos*100).toFixed(0)}%</span></span></div><div class="bar"><i style="width:${v/cs[0][1]*100}%;background:${cores[i%8]}"></i></div></div>`).join(''):'Sem gastos neste mês.';
+}
 
-                if (t.tipo === 'receita') {
-                    rendaTotal += valorNum;
-                    if (t.categoria === 'Casa Própria' || t.categoria === 'FGTS' || t.categoria === 'Reserva de Emergência') {
-                        patrimonioTotal += valorNum;
-                        if (resp === 'Bárbara') reservasBarbara += valorNum;
-                        if (resp === 'Igor') reservasIgor += valorNum;
-                    }
-                    if (t.categoria === 'Casa Própria') {
-                        casaPropriaTotal += valorNum;
-                    }
-                } else {
-                    gastosTotal += valorNum;
-                    if (resp === 'Bárbara') gastosBarbara += valorNum;
-                    if (resp === 'Igor') gastosIgor += valorNum;
-                }
+// Lançamentos
+function setTipo(t){state.tipo=t;$('tp-gasto').classList.toggle('on',t==='gasto');$('tp-receita').classList.toggle('on',t==='receita');$('i-cat').innerHTML=CATS[t].concat(t==='receita'?state.caixas.map(c=>c.nome):[]).map(c=>`<option>${esc(c)}</option>`).join('')}
+function abrirModal(){$('modal').classList.remove('hidden');setTimeout(()=>$('rapido').focus(),50)}
+function rapido(txt){
+  const n=txt.match(/(\d+(?:[.,]\d{1,2})?)/);if(n)$('i-valor').value=n[1].replace(',','.');
+  const rec=/sal[aá]rio|recebi|renda|pix recebido|reserva|fgts|casa/i.test(txt);setTipo(rec?'receita':'gasto');
+  if(/igor/i.test(txt))$('i-resp').value='Igor';else if(/b[aá]rbara/i.test(txt))$('i-resp').value='Bárbara';
+  $('i-desc').value=txt.replace(n?n[0]:'','').replace(/\b(igor|b[aá]rbara)\b/ig,'').trim().replace(/^./,c=>c.toUpperCase());
+  const cat=rec?(/fgts/i.test(txt)?'FGTS':/casa/i.test(txt)?'Casa Própria':/reserva/i.test(txt)?'Reserva de Emergência':'Salário'):Object.keys(DICA).find(c=>DICA[c].test(txt.toLowerCase()));
+  if(cat)$('i-cat').value=cat;
+}
+async function salvar(){
+  const desc=$('i-desc').value.trim(),valor=parseFloat($('i-valor').value);
+  if(!sb)return toast('Sem conexão. Verifique em ⚙️.');
+  if(!desc||isNaN(valor)||valor<=0)return toast('Informe uma descrição e um valor maior que zero.');
+  const b=$('btn-salvar');b.disabled=true;b.textContent='Salvando…';
+  const{error}=await sb.from('transacoes').insert([{responsavel:$('i-resp').value,descricao:desc,valor,tipo:state.tipo,categoria:$('i-cat').value,observacoes:$('i-obs').value.trim(),data:$('i-data').value||new Date().toISOString().slice(0,10)}]);
+  b.disabled=false;b.textContent='Salvar lançamento';
+  if(error)return toast('Erro ao salvar: '+error.message);
+  fechar('modal');['rapido','i-desc','i-valor','i-obs'].forEach(i=>$(i).value='');toast('Lançamento salvo');carregar();
+}
+async function apagar(id){
+  if(!confirm('Apagar este lançamento?'))return;
+  const{error}=await sb.from('transacoes').delete().eq('id',id);
+  if(error)return toast('Erro ao apagar: '+error.message);toast('Lançamento apagado');carregar();
+}
 
-                const obsHTML = t.observacoes ? `<p class="text-[10px] text-gray-400 italic">Obs: ${t.observacoes}</p>` : '';
-
-                const itemHTML = `
-                    <div class="glass-card p-3 flex justify-between items-center text-sm">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 rounded-full ${t.tipo === 'receita' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'} flex items-center justify-center font-bold">
-                                ${t.tipo === 'receita' ? '↓' : '↑'}
-                            </div>
-                            <div>
-                                <p class="font-medium text-white">${t.descricao} <span class="text-[9px] text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded-full ml-1">${resp}</span> <span class="text-[9px] text-gray-300 bg-white/10 px-2 py-0.5 rounded-full">${t.categoria || 'Geral'}</span></p>
-                                ${obsHTML}
-                                <p class="text-[10px] text-gray-400">${new Date(t.data).toLocaleDateString('pt-PT')}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <span class="font-semibold ${t.tipo === 'receita' ? 'text-emerald-400' : 'text-rose-400'}">
-                                ${t.tipo === 'receita' ? '+' : '-'} R$ ${valorNum.toFixed(2)}
-                            </span>
-                            <button onclick="apagarTransacao(${t.id})" class="w-7 h-7 rounded-full bg-rose-500/10 hover:bg-rose-500/30 text-rose-400 flex items-center justify-center text-xs transition" title="Apagar">🗑️</button>
-                        </div>
-                    </div>
-                `;
-
-                if (index < 5) listaEl.innerHTML += itemHTML;
-                if (t.tipo === 'gasto') listaGastosEl.innerHTML += itemHTML;
-                if (t.tipo === 'receita' && (t.categoria === 'FGTS' || t.categoria === 'Reserva de Emergência' || t.categoria === 'Casa Própria')) {
-                    listaReservasEl.innerHTML += itemHTML;
-                }
-            });
-
-            const sobra = rendaTotal - gastosTotal;
-            document.getElementById('saldo-mes').innerText = `R$ ${sobra.toFixed(2)}`;
-            document.getElementById('total-renda').innerText = `R$ ${rendaTotal.toFixed(2)}`;
-            document.getElementById('total-gastos').innerText = `R$ ${gastosTotal.toFixed(2)}`;
-            document.getElementById('total-contas').innerText = `R$ ${gastosTotal.toFixed(2)}`;
-            document.getElementById('total-patrimonio').innerText = `R$ ${patrimonioTotal.toFixed(2)}`;
-            document.getElementById('reserva-patrimonio').innerText = `R$ ${patrimonioTotal.toFixed(2)}`;
-            document.getElementById('meta-valor-acumulado').innerText = `R$ ${casaPropriaTotal.toFixed(2)}`;
-
-            document.getElementById('gastos-barbara').innerText = `R$ ${gastosBarbara.toFixed(2)}`;
-            document.getElementById('gastos-igor').innerText = `R$ ${gastosIgor.toFixed(2)}`;
-            document.getElementById('reservas-barbara').innerText = `R$ ${reservasBarbara.toFixed(2)}`;
-            document.getElementById('reservas-igor').innerText = `R$ ${reservasIgor.toFixed(2)}`;
-
-            const metaTotal = 100000;
-            const progresso = Math.min((casaPropriaTotal / metaTotal) * 100, 100);
-            document.getElementById('meta-barra').style.width = `${progresso}%`;
-            document.getElementById('meta-barra-aba').style.width = `${progresso}%`;
-            document.getElementById('meta-atual').innerText = `R$ ${casaPropriaTotal.toLocaleString('pt-PT', {minimumFractionDigits: 2})} · ${progresso.toFixed(1)}%`;
-            const falta = Math.max(metaTotal - casaPropriaTotal, 0);
-            document.getElementById('meta-falta').innerText = `R$ ${falta.toLocaleString('pt-PT', {minimumFractionDigits: 2})}`;
-        }
-    </script>
+function plano(){
+  const ap=parseFloat($('p-aporte').value)||0,rt=(parseFloat($('p-rend').value)||0)/100,m=meta(),c0=state.casa||0,el=$('plano');
+  ls.set('aporte',ap);ls.set('rend',rt*100);
+  if(c0>=m){el.textContent='Meta já atingida! 🎉';return}
+  if(ap<=0&&rt<=0){el.textContent='Informe o valor do aporte mensal.';return}
+  const proj=n=>{let x=c0;for(let i=0;i<n;i++)x=x*(1+rt)+ap;return x};
+  let n=0,x=c0;while(x<m&&n<600){x=x*(1+rt)+ap;n++}
+  const d=new Date();d.setMonth(d.getMonth()+n);const a=Math.floor(n/12),ms=n%12;
+  const tempo=(a?`${a} ano${a>1?'s':''}`:'')+(a&&ms?' e ':'')+(ms?`${ms} ${ms>1?'meses':'mês'}`:'');
+  el.innerHTML=`<p class="text-sm num">Com <b>${brl(ap)}</b> por mês${rt?` e rendimento de ${(rt*100).toFixed(2).replace('.',',')}% ao mês`:''}, vocês chegam a <b class="text-emerald-400">${brl(m)}</b> em <b>${n} meses</b> (${tempo}), por volta de <b>${MESES[d.getMonth()]} de ${d.getFullYear()}</b>.</p>`
+   +[12,24,36,60].map(k=>`<div class="flex justify-between text-xs"><span class="text-gray-400">Em ${k} meses</span><span class="num">${brl(proj(k))}</span></div>`).join('');
+}
+async function registrarAporte(){
+  const v=parseFloat($('p-aporte').value);
+  if(!sb)return toast('Sem conexão com o Supabase.');
+  if(!(v>0))return toast('Informe o valor do aporte.');
+  const k=ck(new Date());
+  if(state.all.some(t=>t.categoria==='Casa Própria'&&t.descricao==='Aporte mensal'&&dt(t).startsWith(k))&&!confirm('Já existe um aporte mensal neste mês. Registrar outro?'))return;
+  const h=Math.round(v*50)/100,hoje=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+  const row=r=>({responsavel:r,descricao:'Aporte mensal',valor:h,tipo:'receita',categoria:'Casa Própria',observacoes:'Plano de aporte',data:hoje});
+  const{error}=await sb.from('transacoes').insert([row('Bárbara'),row('Igor')]);
+  if(error)return toast('Erro ao registrar: '+error.message);
+  toast('Aporte de '+brl(v)+' registrado');carregar();
+}
+const ritmoM=l=>{const a={};l.forEach(t=>{const x=dt(t).slice(0,7);a[x]=(a[x]||0)+Number(t.valor)});const k=Object.keys(a).sort().slice(-3);return k.length?k.reduce((s,x)=>s+a[x],0)/k.length:0};
+function abrirCaixa(){$('modal-cx').classList.remove('hidden');setTimeout(()=>$('cx-nome').focus(),50)}
+async function criarCaixa(){
+  const nome=$('cx-nome').value.trim(),meta=parseFloat($('cx-meta').value)||0;
+  if(!sb)return toast('Sem conexão com o Supabase.');
+  if(!nome)return toast('Dê um nome para a caixinha.');
+  if(isRes(nome)||CATS.receita.includes(nome))return toast('Já existe uma categoria com esse nome.');
+  const{error}=await sb.from('caixinhas').insert([{nome,emoji:$('cx-emoji').value||'💰',meta}]);
+  if(error)return toast(/caixinhas|relation|schema/i.test(error.message)?'Crie a tabela caixinhas no Supabase (SQL).':'Erro: '+error.message);
+  fechar('modal-cx');$('cx-nome').value='';$('cx-meta').value='';toast('Caixinha criada');carregar();
+}
+async function apagarCaixa(id){
+  if(!confirm('Apagar esta caixinha? Os lançamentos já guardados continuam salvos.'))return;
+  const{error}=await sb.from('caixinhas').delete().eq('id',id);
+  if(error)return toast('Erro ao apagar: '+error.message);toast('Caixinha apagada');carregar();
+}
+function guardarEm(id){
+  const c=state.caixas.find(x=>x.id===id);if(!c)return;
+  abrirModal();setTipo('receita');$('i-cat').value=c.nome;$('i-desc').value='Guardado em '+c.nome;setTimeout(()=>$('i-valor').focus(),80);
+}
+// Configurações
+function abrirConfig(){
+  $('c-meta').value=meta();const o=orc();
+  $('c-orc').innerHTML=CATS.gasto.map((c,i)=>`<div><label class="text-[10px] text-gray-400" for="o${i}">${c}</label><input id="o${i}" type="number" inputmode="decimal" class="inp" value="${o[c]||''}"></div>`).join('');
+  $('c-url').value=ls.get('s_url')||'';$('c-key').value=ls.get('s_key')||'';$('modal-cfg').classList.remove('hidden');
+}
+function salvarCfg(){
+  const m=parseFloat($('c-meta').value);if(m>0)ls.set('meta_casa',m);
+  const o={};CATS.gasto.forEach((c,i)=>{const v=parseFloat($('o'+i).value);if(v>0)o[c]=v});ls.set('orc',JSON.stringify(o));
+  const u=$('c-url').value.trim(),k=$('c-key').value.trim();
+  if(u&&k&&(u!==ls.get('s_url')||k!==ls.get('s_key'))){ls.set('s_url',u);ls.set('s_key',k);return location.reload()}
+  fechar('modal-cfg');render();toast('Configurações salvas');
+}
+function exportarCSV(){
+  const ts=state.all.filter(t=>dt(t).startsWith(ck(state.mes)));if(!ts.length)return toast('Nada para exportar neste mês.');
+  const q=v=>`"${String(v??'').replace(/"/g,'""')}"`;
+  const ln=[['Data','Responsável','Descrição','Tipo','Categoria','Valor','Observações'].map(q).join(';')].concat(ts.map(t=>[dt(t),t.responsavel,t.descricao,t.tipo,t.categoria,String(t.valor).replace('.',','),t.observacoes].map(q).join(';')));
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+ln.join('\n')],{type:'text/csv;charset=utf-8'}));a.download=`nosso-cofre-${ck(state.mes)}.csv`;a.click();
+}
+addEventListener('keydown',e=>{if(e.key==='Escape'){fechar('modal');fechar('modal-cfg');fechar('modal-cx')}});
+mudarAba('inicio');try{iniciar()}catch(e){$('status').textContent='· erro: '+e.message}
+</script>
 </body>
 </html>
 
